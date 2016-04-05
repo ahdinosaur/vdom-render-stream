@@ -5,7 +5,7 @@ var vdom = {
   diff: require('virtual-dom/diff'),
   patch: require('virtual-dom/patch')
 }
-var vraf = require('virtual-raf')
+var mainLoop = require('main-loop')
 
 module.exports = VdomRenderStream
 
@@ -19,7 +19,7 @@ function VdomRenderStream (render, element) {
     objectMode: true
   })
 
-  this.tree = null
+  this.loop = null
   this.render = render
   this.element = element
 }
@@ -27,11 +27,11 @@ function VdomRenderStream (render, element) {
 VdomRenderStream.prototype._write = write
 
 function write (props, enc, cb) {
-  if (this.tree === null) {
-    this.tree = vraf(props, this.render, vdom)
-    this.element.appendChild(this.tree.render())
+  if (this.loop === null) {
+    this.loop = mainLoop(props, this.render, vdom)
+    this.element.appendChild(this.loop.target)
   } else {
-    this.tree.update(props)
+    this.loop.update(props)
   }
   //process.nextTick(cb)
   cb()
