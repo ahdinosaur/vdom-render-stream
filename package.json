@@ -1,6 +1,6 @@
 {
   "name": "vdom-render-stream",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "stream objects to render virtual dom at element",
   "main": "index.js",
   "scripts": {
