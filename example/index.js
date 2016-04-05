@@ -9,14 +9,19 @@ var main = document.querySelector('main')
 getUserMedia({
   audio: true, video: false
 }, function (err, media) {
-  // if err, blow up
-  if (err) { throw err }
+  // if error getting user media,
+  if (err) {
+    // blow up
+    throw err
+  }
 
   readAudio({
     source: media,
     buffer: numSamples,
     channels: 1
-  }).pipe(vdomRenderStream(render, main))
+  }).pipe(
+    vdomRenderStream(render, main)
+  )
 })
 
 function render (audio) {
@@ -37,9 +42,10 @@ function render (audio) {
 
 function getPoints(audio) {
   // cheap code for single channel audio
-  var points = new Array(audio.data.length)
-  for (var i = 0; i < audio.data.length; ++i) {
-    points[i] = i + ',' + audio.data[i]
+  var length = audio.shape[0]
+  var points = new Array(length)
+  for (var t = 0; t < length; ++t) {
+    points[t] = t + ',' + audio.data[t]
   }
   return points
 }

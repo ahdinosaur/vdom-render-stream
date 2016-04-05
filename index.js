@@ -7,32 +7,23 @@ var vdom = {
 }
 var mainLoop = require('main-loop')
 
-module.exports = VdomRenderStream
+module.exports = streamVdom
 
-inherits(VdomRenderStream, Writable)
-function VdomRenderStream (render, element) {
-  if (!(this instanceof VdomRenderStream)) {
-    return new VdomRenderStream(render, element)
-  }
+function streamVdom (render, element) {
+  var loop = null
+  var render = render
+  var element = element
 
-  Writable.call(this, {
-    objectMode: true
+  return new Writable({
+    objectMode: true,
+    write: function writeVdom (props, enc, cb) {
+      if (loop === null) {
+        loop = mainLoop(props, render, vdom)
+        element.appendChild(loop.target)
+      } else {
+        loop.update(props)
+      }
+      process.nextTick(cb)
+    }
   })
-
-  this.loop = null
-  this.render = render
-  this.element = element
-}
-
-VdomRenderStream.prototype._write = write
-
-function write (props, enc, cb) {
-  if (this.loop === null) {
-    this.loop = mainLoop(props, this.render, vdom)
-    this.element.appendChild(this.loop.target)
-  } else {
-    this.loop.update(props)
-  }
-  //process.nextTick(cb)
-  cb()
 }
