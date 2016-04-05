@@ -42,7 +42,6 @@
   "dependencies": {
     "inherits": "^2.0.1",
     "readable-stream": "^2.0.6",
-    "virtual-dom": "^2.1.1",
-    "virtual-raf": "^3.0.0"
+    "virtual-dom": "^2.1.1"
   }
 }

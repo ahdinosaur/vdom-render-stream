@@ -5,14 +5,13 @@ var vdom = {
   diff: require('virtual-dom/diff'),
   patch: require('virtual-dom/patch')
 }
-var vraf = require('virtual-raf')
 
 module.exports = VdomRenderStream
 
 inherits(VdomRenderStream, Writable)
-function VdomRenderStream (render, element) {
+function VdomRenderStream (render, container) {
   if (!(this instanceof VdomRenderStream)) {
-    return new VdomRenderStream(render, element)
+    return new VdomRenderStream(render, container)
   }
 
   Writable.call(this, {
@@ -20,19 +19,27 @@ function VdomRenderStream (render, element) {
   })
 
   this.tree = null
+  this.element = null
   this.render = render
-  this.element = element
+  this.container = container
 }
 
 VdomRenderStream.prototype._write = write
 
-function write (props, enc, cb) {
+function write (state, enc, cb) {
+  // init
   if (this.tree === null) {
-    this.tree = vraf(props, this.render, vdom)
-    this.element.appendChild(this.tree.render())
-  } else {
-    this.tree.update(props)
+    this.tree = this.render(state)
+    this.element = vdom.create(this.tree)
+    this.container.appendChild(this.element)
   }
-  //process.nextTick(cb)
+  // update
+  else {
+    var nextTree = this.render(state)
+    var patches = vdom.diff(this.tree, nextTree)
+    this.element = vdom.patch(this.element, patches)
+    this.tree = nextTree
+  }
+
   cb()
 }
